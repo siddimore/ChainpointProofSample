@@ -46,7 +46,13 @@ def upload():
 
         fileHash = getFileHash(f_name)
         print (fileHash)
-        return json.dumps({'fileHash':fileHash})
+        hashArray = []
+        hashArray.append(fileHash)
+        jsonFileHash = {'hashes':hashArray}
+
+        content, retCode = chainPointHash(jsonFileHash)
+        #return json.dumps({'fileHash':fileHash})
+        return content, retCode
 
 
 @app.route('/proof/', methods=['POST'])
@@ -80,6 +86,13 @@ def hashSubmit():
 
     return res.content, 200
 
+def chainPointHash(fileHash):
+    print(fileHash)
+    res = requests.post('http://35.230.179.171/hashes', json=fileHash)
+    print ((res.status_code))
+    print(res.content)
+
+    return res.content, 200
 
 def getFileHash(filename):
 
