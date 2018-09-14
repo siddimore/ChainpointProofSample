@@ -1,2 +1,5 @@
 flask_table
 flask-sqlalchemy
+requests
+json
+werkzeug
