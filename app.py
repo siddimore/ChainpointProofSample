@@ -27,6 +27,7 @@ def getProofFromNode():
     res = requests.get('http://35.230.179.171/proofs/' + nodeId)
     print ((res.status_code))
     print(res.content)
+    # return render_template('upload.html', filehash = res.content["meta"])
 
     return res.content, 200
 
@@ -50,9 +51,32 @@ def upload():
         hashArray.append(fileHash)
         jsonFileHash = {'hashes':hashArray}
 
-        content, retCode = chainPointHash(jsonFileHash)
+        hashNode, hash, retCode = chainPointHash(jsonFileHash)
+        #print(jsonify(content))
         #return json.dumps({'fileHash':fileHash})
-        return content, retCode
+        return render_template('upload.html', nodeId = hashNode, filehash = hash)
+        #return content, retCode
+
+
+@app.route('/getDocProof', methods=['POST'])
+def getDocProof():
+    nodeId = request.form['node_id']
+    print (nodeId)
+    # # Check that the required fields are in the POST'ed data
+    # required = ['nodeId']
+    # if not all(k in values for k in required):
+    #     return 'Missing Hash', 400
+
+    res = requests.get('http://35.230.179.171/proofs/' + nodeId)
+    data = res.json()
+    print(data)
+    for entry in data:
+        print(entry['proof'])
+        chaipointProof = entry['proof']
+
+    return render_template('upload.html', proof = chaipointProof)
+    #
+    # return res.content, 200
 
 
 @app.route('/proof/', methods=['POST'])
@@ -68,7 +92,10 @@ def getProof():
     print ((res.status_code))
     print(res.content)
 
-    return res.content, 200
+    data = res.json()
+    proof = data.get('proof')
+
+    return proof, 200
 
 @app.route('/SubmitHash/new', methods=['POST'])
 def hashSubmit():
@@ -84,15 +111,35 @@ def hashSubmit():
     print ((res.status_code))
     print(res.content)
 
+    # return res.content, 200
+
+def docProof(proof):
+
+    res = requests.get('http://35.230.179.171/proofs/' + proof)
+    print ((res.status_code))
+    print(res.content)
+
     return res.content, 200
 
 def chainPointHash(fileHash):
     print(fileHash)
     res = requests.post('http://35.230.179.171/hashes', json=fileHash)
     print ((res.status_code))
-    print(res.content)
+    data = res.json()
+    meta = data.get('meta')
+    hashes = data.get('hashes')
+    print((hashes[0]['hash_id_node']))
+    print((hashes[0]['hash']))
+    # output = json.dumps(res.content)
+    #
+    # # Convert bytes to string type and string type to dict
+    # print("resp: " + output)
+    # print(output["meta"])
+    # string = res.read().decode('utf-8')
+    # json_obj = json.loads(string)
+    # print(json_obj)
 
-    return res.content, 200
+    return hashes[0]['hash_id_node'], hashes[0]['hash'], 200
 
 def getFileHash(filename):
 
